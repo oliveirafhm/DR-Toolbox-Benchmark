@@ -10,6 +10,7 @@ javaaddpath([poiPath 'poi-ooxml-schemas-3.8-20120326.jar']);
 javaaddpath([poiPath 'xmlbeans-2.3.0.jar']);
 javaaddpath([poiPath 'dom4j-1.6.1.jar']);
 javaaddpath([poiPath 'stax-api-1.0.1.jar']);
+addpath(genpath('Third party codes'));
 
 clc;
 useConfigData = 1;
@@ -34,7 +35,7 @@ if useConfigData == 1
             tic
             % Save experiment datetime in ExperimentConfig xls file
             datetimeCol = colHeadingsLetters{ismember(colHeadingsTxt,'DateTime')};
-            xlwrite(configFilePath, datestr(datetime), 1, [datetimeCol int2str(mainCounter+1)]);
+            xlwrite(configFilePath, {datestr(datetime)}, 1, [datetimeCol int2str(mainCounter+1)]);
             PCAAnalysis;
             Classification;
             clearvars -except expConfigData mainCounter configFilePath ...

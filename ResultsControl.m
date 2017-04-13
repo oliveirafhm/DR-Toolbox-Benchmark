@@ -63,7 +63,7 @@ for i = 1:length(groupExp)
     overviewTempSheet{3} = expConfigData2{kk(1),resultsXLSFNColNumber};
     % Load group experiment xls file (ResultsMar2017..) - Summary sheet
     % For Cross-Validation
-    [~,~,resultsSumRange] = xlsread([resultsPath overviewTempSheet{i,3}],...
+    [~,~,resultsSumRange] = xlsread([resultsPath overviewTempSheet{1,3}],...
         1,'Q73:Y74');
     % Cross validation general mean of SH(SH)
     overviewTempSheet{4} = resultsSumRange{1,1};
@@ -73,7 +73,7 @@ for i = 1:length(groupExp)
     overviewTempSheet{6} = resultsSumRange{1,9};
     % Load group experiment xls file (ResultsMar2017..) - Summary sheet
     % For Test set
-    [~,~,resultsSumRange] = xlsread([resultsPath overviewTempSheet{i,3}],...
+    [~,~,resultsSumRange] = xlsread([resultsPath overviewTempSheet{1,3}],...
         1,'C73:K74');
     % Test general mean of SH(SH)
     overviewTempSheet{7} = resultsSumRange{1,1};

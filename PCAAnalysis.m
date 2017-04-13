@@ -164,7 +164,7 @@ for i=1:nGroups
 end
 
 %% PCA, Sammon and t-SNE projection
-addpath(genpath('Third party codes'));
+%addpath(genpath('Third party codes'));
 
 % Group groups before run 2D projection?
 group = 1;
