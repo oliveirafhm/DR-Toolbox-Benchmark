@@ -306,8 +306,8 @@ if computeMapAlg ~= 1
         hiddenLayerSize = floor(mappingInfoPCA.no_dims * 0.7);
     end
     % Setup Division of Data for Training (%), Validation (%), Testing (%)
-    trainRatio = 75;
-    valRatio = 15;
+    trainRatio = 75; % actually 90%
+    valRatio = 15; % not used because of used training function
     testRatio = 10;
     % Train the Network
     nnTrainTrials = 5;
