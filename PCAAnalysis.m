@@ -106,6 +106,7 @@ for i=1:nGroups
         Z{i} = zeros(size(z{i}));
     end
     if normMethod == 0
+        % Data normalization using each individual group
         Z{i} = zscore(z{i});
     elseif normMethod == 1
         % Data normalization using mean and std from non parkinson group
@@ -117,6 +118,7 @@ for i=1:nGroups
             end
         end
     elseif normMethod == 2 && i == nGroups
+        % Data normalization using all groups together
         Z0 = cell2mat(z);
         Z0 = zscore(Z0);
         zAux = [0];
@@ -202,7 +204,7 @@ if group == 1
         [s, mappingInfo] = compute_mapping(Z1, 'Sammon', 2, opts);
     elseif computeMapAlg == 3
         % t-SNE projection algorithm parameters
-        initial_dims = 30;
+        initial_dims = 30;%TODO: Variate this variable too.
         % https://lvdmaaten.github.io/tsne/
         if useConfigData == 0
             perplexity = inputdlg('Type perplexity param: (int between 5 - 50)');
@@ -307,7 +309,7 @@ if computeMapAlg ~= 1
     end
     % Setup Division of Data for Training (%), Validation (%), Testing (%)
     trainRatio = 75; % actually 90%
-    valRatio = 15; % not used because of used training function
+    valRatio = 15; % not used because of chosen training function
     testRatio = 10;
     % Train the Network
     nnTrainTrials = 5;

@@ -50,6 +50,7 @@ end
 classNames = unique(targetClassS);
 
 %% Creates and trains SVM model
+%% TODO: Plot model boundaries
 if genNewModel == 'y'
     if useConfigData == 0
         % Default setup
