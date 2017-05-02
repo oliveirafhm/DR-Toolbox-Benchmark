@@ -30,7 +30,8 @@ net.divideParam.testRatio = testRatio/100;
 % Training parameters
 %net.trainParam.showWindow = false;
 % Train the Network (TODO: test use gpu)
-[net,tr] = train(net,x',t');%,'useParallel','yes');
+[net,tr] = train(net,x',t');
+%[net,tr] = train(net,x',t','useParallel','yes','useGPU','yes');
 % Test the Network
 y = net(x');
 e = gsubtract(t',y);
