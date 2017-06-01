@@ -323,6 +323,7 @@ if computeMapAlg ~= 1
             bestNN = i;
         end
     end
+    bestNN
 % If DR method is PCA, we does not need train a model to out-of-sample
 % process
 elseif computeMapAlg == 1
