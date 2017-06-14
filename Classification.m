@@ -50,7 +50,7 @@ end
 classNames = unique(targetClassS);
 
 %% Creates and trains SVM model
-%% TODO: Plot model boundaries
+% TODO: Plot model boundaries
 if genNewModel == 'y'
     if useConfigData == 0
         % Default setup
@@ -449,7 +449,7 @@ if saveData == 'y'
     xlwrite([xlsPath xlsFileName], tsCv, sheetName, tsLossStartRange{task});
 end
 
-%% Confusion matrix plot
+%% Confusion matrix plot (test set)
 % figure;
 % hold on;
 % pc = plotconfusion(testTargetsMatrix,testPScore_t_matrix);

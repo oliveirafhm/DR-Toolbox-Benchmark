@@ -81,7 +81,7 @@ for i = 1:length(paramRange)
     arrayFieldsCell{i} = arrayFieldsCellTemp;
     arrayFieldsCellTemp = {};
 end
-% Cell + struct (same data as arrayFieldsCell
+% Cell + struct (same data as arrayFieldsCell)
 arrayFieldsStruct = {};
 for i = 1:length(arrayFieldsCell)
     for j = 1:length(arrayFieldsCell{i})
@@ -99,7 +99,7 @@ for i = 1:length(arrayFieldsStruct)
         fn = fieldnames(arrayFieldsStruct{i}{j});
         param{j} = arrayFieldsStruct{i}{j}.(fn{1});
     end
-    % Alert: You should modify combvec function before run it here
+    % Alert: You should modify the source of combvec function before run it here
     allPossibilities{i} = combvec(param)';
 end
 
