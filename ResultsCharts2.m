@@ -36,38 +36,38 @@ yCV = NaN(length(resultsControlData), length(DRAlgs), nGroups);
 yT = NaN(length(resultsControlData), length(DRAlgs), nGroups);
 idx = {};
 for p = 1:nGroups
-    for c = 1:length(DRAlgs)
-        if c ~= 3
-            idx{c} = find([resultsControlData{:,2}] == c);
+    for j = 1:length(DRAlgs)
+        if j ~= 3
+            idx{j} = find([resultsControlData{:,2}] == j);
         else
-            idx0 = find([resultsControlData{:,2}] == c);
+            idx0 = find([resultsControlData{:,2}] == j);
             % Split XLSX file name
             subStrings = cellfun(@(s) strsplit(s,'_'), ...
                 resultsControlData(idx0,xlsFileNameCol), ...
                 'UniformOutput', false);  
-            idx{c} = [];
+            idx{j} = [];
             for ssi = 1:length(subStrings)
                 % Get perplexity value from Xls file name string
                 ss = strsplit(subStrings{ssi}{end},'.');
                 ss = str2double(ss{1});
                 if ss > perpThreshold(1) && ss < perpThreshold(2)
-                    idx{c}(end+1) = idx0(ssi);
+                    idx{j}(end+1) = idx0(ssi);
                 end
             end
             tSneL = ['(' int2str(perpThreshold(1)) ' < perp < ' ...
                 int2str(perpThreshold(2)) ')'];
         end
         % row = method accuracy, column = group of subject, page = DR method
-        for r = 1:length(idx{c})
+        for r = 1:length(idx{j})
             %             yCV(r,c,p) = [resultsControlData{idx(r),GM_CV_Cols(p)}];
             %             yT(r,c,p) = [resultsControlData{idx(r),GM_T_Cols(p)}];
-            yCV(r,p,c) = [resultsControlData{idx{c}(r),GM_CV_Cols(p)}];
-            yT(r,p,c) = [resultsControlData{idx{c}(r),GM_T_Cols(p)}];
+            yCV(r,p,j) = [resultsControlData{idx{j}(r),GM_CV_Cols(p)}];
+            yT(r,p,j) = [resultsControlData{idx{j}(r),GM_T_Cols(p)}];
         end
     end
 end
 %% Bar chart with std (error bars) for each DR method to show each group
-% mean and std. For LOO CV and Test set.
+% mean (grand average) and std. For LOO CV and Test set.
 plotBar = 0;
 
 nBars = nGroups * nSets; % length(GMCols)/2
@@ -144,7 +144,7 @@ if plotBar
         'Groups of subjects', 'Success rate (%)', bone, 'y', legend, 2, 'plot', 10);
 end
 %% Boxplot for each DR method to show each group
-% mean. For LOO CV and Test set.
+% mean (Grand boxplot). For LOO CV and Test set.
 legend = {'PCA', 'Sammon''s mapping', ['t-SNE ' tSneL]};
 labels = {'PCA', 'Sammon''s', 't-SNE '};
 factor = 10;
@@ -192,6 +192,83 @@ set(findobj(gca,'Type','text'),'FontSize',11+factor*0.9);
 xlabel('','FontSize', 11+factor);
 ylabel('Success rate (%)', 'FontSize', 11+factor);
 
-%% Overall confusion matrix of general mean
-
-
+%% Overall confusion matrix of general mean (Grand average)
+workFolder = 'PaperNeural';
+resultsPath = [workFolder '/Results/'];
+saveGrandConfusion = 'y';
+grandConfusionMCV = zeros(nGroups+1, nGroups+1, length(DRAlgs));
+grandConfusionMT = zeros(nGroups+1, nGroups+1, length(DRAlgs));
+for drA = 1:length(DRAlgs)
+    for i=1:length(idx{drA})
+        % Load group experiment xls file (ResultsMar2017..) - Summary sheet
+        % For Cross-Validation
+        [~,~,resultsSumRange] = xlsread([resultsPath...
+            resultsControlData{idx{drA}(i),xlsFileNameCol}], 1, 'Q73:Y73');
+        resultsSumRange = [resultsSumRange{:}];
+        % Construct grand confusion 3d matrix for CV
+        gc = 1;
+        for j=1:nGroups:nGroups*nGroups
+            gl = 1;
+            for jj=j:j+nGroups-1
+                grandConfusionMCV(gl, gc, resultsControlData{idx{drA}(i),2}) = ...
+                    grandConfusionMCV(gl, gc, resultsControlData{idx{drA}(i),2}) + ...
+                    resultsSumRange(jj);
+                gl = gl + 1;
+            end
+            gc = gc + 1;
+        end
+        % Load group experiment xls file (ResultsMar2017..) - Summary sheet
+        % For Test set
+        [~,~,resultsSumRange] = xlsread([resultsPath...
+            resultsControlData{idx{drA}(i),xlsFileNameCol}], 1, 'C73:K73');
+        resultsSumRange = [resultsSumRange{:}];
+        % Construct grand confusion 3d matrix for test set
+        gc = 1;
+        for j=1:nGroups:nGroups*nGroups
+            gl = 1;
+            for jj=j:j+nGroups-1
+                grandConfusionMT(gl, gc, resultsControlData{idx{drA}(i),2}) = ...
+                    grandConfusionMT(gl, gc, resultsControlData{idx{drA}(i),2}) + ...
+                    resultsSumRange(jj);
+                gl = gl + 1;
+            end
+            gc = gc + 1;
+        end
+    end
+    % Calc average of grand confusion 3d matrix
+    grandConfusionMCV(:,:,drA) = grandConfusionMCV(:,:,drA)./length(idx{drA});
+    grandConfusionMT(:,:,drA) = grandConfusionMT(:,:,drA)./length(idx{drA});
+    % Calc last column, last row and last cell of confusion matrix
+    oAccCV = 0; oAccT = 0;
+    for gIdx = 1:nGroups
+       grandConfusionMCV(gIdx,nGroups+1,drA) = ...
+           grandConfusionMCV(gIdx,gIdx,drA)*100/sum(grandConfusionMCV(gIdx,:,drA));
+       grandConfusionMCV(nGroups+1,gIdx,drA) = ...
+           grandConfusionMCV(gIdx,gIdx,drA)*100;
+       grandConfusionMT(gIdx,nGroups+1,drA) = ...
+           grandConfusionMT(gIdx,gIdx,drA)*100/sum(grandConfusionMT(gIdx,:,drA));
+       grandConfusionMT(nGroups+1,gIdx,drA) = ...
+           grandConfusionMT(gIdx,gIdx,drA)*100;
+       % Calc of overall accuracy
+       oAccCV = oAccCV + grandConfusionMCV(gIdx,gIdx,drA);
+       oAccT = oAccT + grandConfusionMT(gIdx,gIdx,drA);       
+       if gIdx == nGroups
+         grandConfusionMCV(end,end,drA) = ...
+             oAccCV / sum(sum(grandConfusionMCV(1:nGroups,1:nGroups,drA)))*100;
+         grandConfusionMT(end,end,drA) = ...
+             oAccCV / sum(sum(grandConfusionMT(1:nGroups,1:nGroups,drA)))*100;
+       end
+    end
+end
+% Save grand confusion matrix in ResultsControlFinal.xlsx file
+if saveGrandConfusion == 'y'
+   sheetNumber = 3;% hard code
+   testStartRange = {'C6','C14','C22'};
+   crossValidatedStartRange = {'J6','J14','J22'};
+   for i=1:length(DRAlgs)
+      xlwrite(resultsControlFilePath, grandConfusionMT(:,:,i),...
+          sheetNumber, testStartRange{i});
+      xlwrite(resultsControlFilePath, grandConfusionMCV(:,:,i),...
+          sheetNumber, crossValidatedStartRange{i});
+   end
+end
