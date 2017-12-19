@@ -50,7 +50,7 @@ end
 classNames = unique(targetClassS);
 
 %% Creates and trains SVM model
-% TODO: Plot model boundaries
+% TODO: Plot model boundaries (partially did, look DecisionBoundary.m)
 if genNewModel == 'y'
     if useConfigData == 0
         % Default setup
@@ -82,7 +82,7 @@ if genNewModel == 'y'
     %         pool = parpool;
     %     end
     parOptions = statset('UseParallel',1);
-    
+    % TODO: Separate model creation and training from cross-validation
     CVMdl = fitcecoc(x(:,1:2),targetClassS, 'Learners', template, ...
         'FitPosterior',1, ...
         'ClassNames', classNames, 'Leaveout', 'on', 'Verbose', 1,...
@@ -128,7 +128,7 @@ for c = 1:nClass
     [rocX,rocY,rocT,AUC,OPTROCPT] = perfcurve(targetClassS,...
         PScore(:,c),c,'NBoot',1000,'TVals',[0:1/(lenPScore-1):1],...
         'Options', parOptions);
-    
+    % TODO: Save confidence interval of ROC, not only mean value.
     rocData{c,1} = rocX(:,1);
     rocData{c,2} = rocY(:,1);
     rocData{c,3} = rocT;
@@ -368,6 +368,7 @@ end
 %% Test set classification
 
 % Train SVM model to predict new data (test set)
+% Fix this to use the same model used in cross-validation step
 Mdl = fitcecoc(x(:,1:2),targetClassS, 'Learners', template, ...
     'FitPosterior',1, ...
     'ClassNames', classNames, 'Verbose', 1,...
@@ -401,6 +402,8 @@ testPScore_t = testPScore';
 
 testPScore_t_matrix = [testPScore_t_matrix testPScore_t];
 testTargetsMatrix = [testTargetsMatrix testTargets];
+
+% TODO: Compute ROC for test set
 
 if saveData == 'y'
     tsModelFileName = [baseName '_SvmModel.mat'];

@@ -50,7 +50,7 @@ if useConfigData == 1
     end
     % Fit experiments data in ResultsControl xls file
     if saveData == 'y'
-        ResultsControl;
+        ResultsControlv2;
     end
 elseif useConfigData == 0
     PCAAnalysis;
