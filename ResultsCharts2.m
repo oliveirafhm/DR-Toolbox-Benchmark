@@ -1,8 +1,8 @@
 % By F?bio Henrique (oliveirafhm@gmail.com)
 % Run at the end of everything
 % ...
-% 06/2017 (last modification: 30/11/2017)
-%%
+% 06/2017 (last modification: 04/01/2018)
+%% ------------------------ Part 1 ------------------------
 poiPath = 'Third party codes/xlswrite/20130227_xlwrite/poi_library/';
 javaaddpath([poiPath 'poi-3.8-20120326.jar']);
 javaaddpath([poiPath 'poi-ooxml-3.8-20120326.jar']);
@@ -13,6 +13,7 @@ javaaddpath([poiPath 'stax-api-1.0.1.jar']);
 addpath(genpath('Third party codes'));
 
 %% Load results from ResultsControl xlsx file
+% ------------------------ Part 1 ------------------------
 
 [resultsControlFileName, resultsControlPathName] = uigetfile('.xlsx', ...
     'Select results control xlsx file');
@@ -23,6 +24,7 @@ resultsControlHeadings = resultsControl(1,1:end);
 resultsControlData = resultsControl(2:end,1:end);
 
 %% Organize ResultsControl data
+% ------------------------ Part 1 ------------------------
 % Columns with general mean and std
 GMCols = 4:2:length(resultsControlHeadings);
 GM_CV_Cols = GMCols(1:length(GMCols)/2);
@@ -77,13 +79,14 @@ for p = 1:nGroups
 end
 %% Bar chart with std (error bars) for each DR method to show each group
 % mean (grand average) and std. For LOO CV and Test set.
-plotBar = 0;
-
-nBars = nGroups * nSets; % length(GMCols)/2
-meanGM = zeros(length(DRAlgs),nBars);
-meanSTD = zeros(length(DRAlgs),nBars);
-%
-clearvars GM GM_CV GM_T;
+% ------------------------ Part 1 ------------------------
+% plotBar = 0;
+% 
+% nBars = nGroups * nSets; % length(GMCols)/2
+% meanGM = zeros(length(DRAlgs),nBars);
+% meanSTD = zeros(length(DRAlgs),nBars);
+% %
+% clearvars GM GM_CV GM_T;
 
 % for j = 1:length(DRAlgs)
 % %     idx = find([resultsControlData{:,2}] == j);
@@ -132,28 +135,33 @@ clearvars GM GM_CV GM_T;
 %         if k == nBars/2, kj = j; end
 %     end
 % end
-if plotBar
-    %barGroups = {'S_{H}','S_{PD}','S_{DBS}'};
-    legend = {'PCA', 'Sammon''s mapping', ['t-SNE ' tSneL]};
-    
-    % Mean GM chart of training set with LOO cross-validation
-    barY1 = meanGM(:,1:3)';
-    barY1STD = meanSTD(:,1:3)';
-    figure;
-    barweb(barY1, barY1STD, [], groups, ...
-        'True positive general mean for each group of subjects of training set (LOO CV)',...
-        'Groups of subjects', 'Success rate (%)', bone, 'y', legend, 2, 'plot', 10);
-    
-    % Mean GM chart of test set
-    barY2 = meanGM(:,4:6)';
-    barY2STD = meanSTD(:,4:6)';
-    figure;
-    barweb(barY2, barY2STD, [], groups, ...
-        'True positive general mean for each group of subjects of test set',...
-        'Groups of subjects', 'Success rate (%)', bone, 'y', legend, 2, 'plot', 10);
-end
+% if plotBar
+%     %barGroups = {'S_{H}','S_{PD}','S_{DBS}'};
+%     legend = {'PCA', 'Sammon''s mapping', ['t-SNE ' tSneL]};
+%     
+%     % Mean GM chart of training set with LOO cross-validation
+%     barY1 = meanGM(:,1:3)';
+%     barY1STD = meanSTD(:,1:3)';
+%     figure;
+%     barweb(barY1, barY1STD, [], groups, ...
+%         'True positive general mean for each group of subjects of training set (LOO CV)',...
+%         'Groups of subjects', 'Success rate (%)', bone, 'y', legend, 2, 'plot', 10);
+%     
+%     % Mean GM chart of test set
+%     barY2 = meanGM(:,4:6)';
+%     barY2STD = meanSTD(:,4:6)';
+%     figure;
+%     barweb(barY2, barY2STD, [], groups, ...
+%         'True positive general mean for each group of subjects of test set',...
+%         'Groups of subjects', 'Success rate (%)', bone, 'y', legend, 2, 'plot', 10);
+% end
+%% Calc mean of grand average success rate
+nanmean(yCV)
+nanmean(yT)
+
 %% Boxplot for each DR method to show each group
 % mean (Grand boxplot). For LOO CV and Test set.
+% ------------------------ Part 1 ------------------------
 legend = {'PCA', 'Sammon''s mapping', ['t-SNE ' tSneL]};
 labels = {'PCA', 'Sammon''s', 't-SNE '};
 factor = 10;
@@ -206,6 +214,7 @@ pbaspect([1.5 1 1]); % Figure aspect ratio
 % [h,p] = kstest(yCV(:,3,3));
 
 %% Statistical analysis of groups in boxplot
+% ------------------------ Part 1 ------------------------
 savePValues = 'n';
 % DRAlgs X DRAlgs X Group of subjects
 pValueCV = NaN(length(DRAlgs), length(DRAlgs), nGroups);
@@ -214,10 +223,12 @@ pValueT = NaN(length(DRAlgs), length(DRAlgs), nGroups);
 for g = 1:nGroups
     for pi = 1:length(DRAlgs)
         for pj = 1:length(DRAlgs)
-            [pCV,hCV] = ranksum(yCV(:,g,pi),yCV(:,g,pj));
+            %             [pCV,hCV] = ranksum(yCV(:,g,pi),yCV(:,g,pj));
+            [hCV,pCV] = kstest2(yCV(:,g,pi),yCV(:,g,pj));
             pValueCV(pi, pj, g) = pCV;
             
-            [pT,hT] = ranksum(yT(:,g,pi),yT(:,g,pj));
+            %             [pT,hT] = ranksum(yT(:,g,pi),yT(:,g,pj));
+            [hT,pT] = kstest2(yT(:,g,pi),yT(:,g,pj));
             pValueT(pi, pj, g) = pT;
         end
     end
@@ -230,12 +241,13 @@ if savePValues == 'y'
     crossValidatedStartRange = {'J7','J15','J23'};
     for i=1:nGroups
         xlwrite(resultsControlFilePath, pValueCV(:,:,i),...
-            sheetNumber, testStartRange{i});
-        xlwrite(resultsControlFilePath, pValueT(:,:,i),...
             sheetNumber, crossValidatedStartRange{i});
+        xlwrite(resultsControlFilePath, pValueT(:,:,i),...
+            sheetNumber, testStartRange{i});
     end
 end
 %% Overall confusion matrix of general mean (Grand average)
+% ------------------------ Part 1.1 ------------------------
 workFolder = 'PaperNeural';
 resultsPath = [workFolder '/Results/'];
 saveGrandConfusion = 'n';
@@ -317,7 +329,7 @@ if saveGrandConfusion == 'y'
 end
 
 %% Average ROC with confidence interval for each DR method
-
+% ------------------------ Part 2 ------------------------
 % Load experiment config file
 [configFileName, configPathName] = uigetfile('.xlsx', ...
     'Select experiment config file');
@@ -347,15 +359,16 @@ for i = 1:nDR
 end
 
 %% ROC calculus for LOOCV
-% Load: ..._LooSvmModel.mat
+% ------------------------ Part 2 ------------------------
 addpath(genpath('PaperNeural'));
 parOptions = statset('UseParallel',1);
 groupsNames = {'S_{H}','S_{PD}','S_{DBS}'};
-% max n of roc samples X n DR methods x n of groups
+% max n of roc samples X n of DR methods x n of groups
 rocData = cell(length(idx{3}),nDR,length(groupsNames));
 tic
 for i = 1:nDR
     for j = 1:length(idx{i})
+        % Load: ..._LooSvmModel.mat
         load([expConfigData(idx{i}(j)).BaseFileName '_LooSvmModel.mat']);
         [label,~,PScore,Posterior] = kfoldPredict(CVMdl, 'Options', parOptions);
         lenPScore = length(PScore);
@@ -369,9 +382,9 @@ for i = 1:nDR
     end
 end
 toc
+% TODO: Save vars
 %% ROC calculus for test set (hold-out)
-% Load: ..._OosModelData.mat
-% Load: ..._SvmModel.mat
+% ------------------------ Part 2 ------------------------
 addpath(genpath('PaperNeural'));
 parOptions = statset('UseParallel',1);
 groupsNames = {'S_{H}','S_{PD}','S_{DBS}'};
@@ -381,7 +394,9 @@ rocData = cell(length(idx{3}),nDR,length(groupsNames));
 tic
 for i = 1:nDR
     for j = 1:length(idx{i})
+        % Load: ..._OosModelData.mat
         load([expConfigData(idx{i}(j)).BaseFileName '_OosModelData.mat']);
+        % Load: ..._SvmModel.mat
         load([expConfigData(idx{i}(j)).BaseFileName '_SvmModel.mat']);
         [testLabelSVM,~,testPScore,testPosterior] = ...
             predict(Mdl, oos.projection, 'Options', parOptions);
@@ -398,8 +413,10 @@ for i = 1:nDR
     end
 end
 toc
+% TODO: Save vars
 %% Calc mean ROC for LOO
-% Load LOO ROC Data first
+% ------------------------ Part 3 ------------------------
+% TODO: Load LOO ROC Data first
 
 % DR algs X Subject group
 meanRocDataLoo = cell(nDR, length(groupsNames));
@@ -428,6 +445,7 @@ for c = 1:nDR
 end
 
 %% Mean ROC curve plot for LOOCV
+% ------------------------ Part 3 ------------------------
 addpath(genpath('Third party codes'));
 
 nClass = length(groupsNames);
@@ -478,10 +496,12 @@ for g = 1:nClass
     % grid on;
     hold off;
 end
+pbaspect([1 1 1]);
 
 %% Calc mean ROC for Holdout
-% Load Test set ROC Data first
-
+% ------------------------ Part 4 ------------------------
+% TODO: Load Test set ROC Data first
+ciFlag = 0; % confidence interval flag
 % DR algs X Subject group
 meanRocDataHoldout = cell(nDR, length(groupsNames));
 % rocX = []; rocY = []; rocT = []; AUC = []; OPTROCPT = [];
@@ -492,6 +512,18 @@ for c = 1:nDR
         meanRocDataHoldout{c,p} = cell(1,nRocVars);
         for r = 1:length(idx{c})
             for nCell = 1:nRocVars
+                if ciFlag == 0
+                    % Fix ROC length to 20 points to enable average
+                    n = 20;
+                    if nCell == 1 && length(rocData{r,c,p}{nCell}) < n
+                        [x,y,ux,iux] = ROCInterp(rocData{r,c,p}{nCell}, ...
+                            rocData{r,c,p}{nCell+1}, n, [0 1], '', 0);
+                        rocData{r,c,p}{nCell} = x';
+                        rocData{r,c,p}{nCell+1} = y';
+                        rocData{r,c,p}{nCell+2} = [1:-(1/(n-1)):0]';
+                    end
+                end
+                %
                 if r ~= 1
                     meanRocDataHoldout{c,p}{nCell} = ...
                         meanRocDataHoldout{c,p}{nCell} + rocData{r,c,p}{nCell};
@@ -509,6 +541,7 @@ for c = 1:nDR
 end
 
 %% Mean ROC curve plot for Holdout
+% ------------------------ Part 4 ------------------------
 addpath(genpath('Third party codes'));
 
 nClass = length(groupsNames);
@@ -532,30 +565,39 @@ for g = 1:nClass
     hold on;
     for c = 1:nDR
         rocData = drRocData{c};
-        if fixROCToPlot == 1
-            rocData{1}(1,1:3) = 0;
-            rocData{2}(1,1:3) = 0;
+        if fixROCToPlot
+            if ciFlag
+                rocData{1}(1,1:3) = 0;
+                rocData{2}(1,1:3) = 0;
+            else
+                rocData{1}(1) = 0;
+                rocData{2}(1) = 0;
+            end
         end
-        %         [l,p] =
-        boundedline(rocData{1}(:,1), rocData{2}(:,1), ...
-            [rocData{2}(:,1)-rocData{2}(:,2) ...
-            rocData{2}(:,3)-rocData{2}(:,1)], lineSC{c}, 'alpha');
-        %         outlinebounds(l,p);
-        %         aucDR{c+c-1} = '';
-        %         aucDR{c+c} = [drNames{c} ' (Mean AUC = ' num2str(rocData{4}(1),2) ')'];
+        if ciFlag
+            boundedline(rocData{1}(:,1), rocData{2}(:,1), ...
+                [rocData{2}(:,1)-rocData{2}(:,2) ...
+                rocData{2}(:,3)-rocData{2}(:,1)], lineSC{c}, 'alpha');
+        else
+            plot(rocData{1}(:,1), rocData{2}(:,1), lineSC{c});
+        end
+        
         aucDR{c} = [drNames{c} ' (Mean AUC = ' num2str(rocData{4}(1),2) ')'];
     end
     xlabel('False positive rate','fontsize',baseFontSize);
     ylabel('True positive rate','fontsize',baseFontSize);
     title(['Hold-out ' groupsNames{g}],'fontsize',baseFontSize+2);
-    plot([1, 0], [0, 1], '--','Color',[0.5,0.5,0.5]);
-    %     aucDR{end} = '';
-    hl = findobj(gca,'Type','line');
-    hp = findobj(gca,'Type','patch');
-    legend([hl(4) hl(3) hl(2)], aucDR, 'Location','Best','fontsize',baseFontSize);
+    if ciFlag
+        plot([1, 0], [0, 1], '--','Color',[0.5,0.5,0.5]);
+        hl = findobj(gca,'Type','line');
+        hp = findobj(gca,'Type','patch');
+        legend([hl(4) hl(3) hl(2)], aucDR, 'Location','Best',...
+            'fontsize',baseFontSize);
+    else
+        legend(aucDR, 'Location','Best','fontsize',baseFontSize);
+        plot([1, 0], [0, 1], '--','Color',[0.5,0.5,0.5]);
+    end
     set(gca,'fontsize',baseFontSize);
-    % ylim([0 1.05]);
-    % xlim([-0.05 1]);
-    % grid on;
     hold off;
 end
+pbaspect([1 1 1]);
