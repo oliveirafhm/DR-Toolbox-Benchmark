@@ -1,11 +1,15 @@
+% Author: Fabio Henrique (oliveirafhm@gmail.com)
+% 04/2018
+% DR parameters correlation analysis 
+
 %% Load data
 % Load parameter settings xls
 
 %%
-corrDataS = sammons;
+corrData_sammons = sammons;
 % Pick only columns to be correlated
 varsColumns = {'Iter';'LR';'DRErr';'CVAcc'};
-corrDataSTable = array2table(corrDataS,...
+corrDataSTable = array2table(corrData_sammons,...
     'VariableNames',varsColumns);
 % Plot correlation data
 baseFontSize = 16;
@@ -17,10 +21,10 @@ baseFontSize = 16;
 % hold off; 
 
 %%
-corrDataS = t_sne;
+corrData_tsne = t_sne;
 % Pick only columns to be correlated
 varsColumns = {'Iter';'LR';'Perp';'DRErr';'CVAcc'};
-corrDataSTable = array2table(corrDataS,...
+corrDataSTable = array2table(corrData_tsne,...
     'VariableNames',varsColumns);
 % Plot correlation data
 baseFontSize = 16;

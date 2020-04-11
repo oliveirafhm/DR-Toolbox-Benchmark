@@ -6,6 +6,8 @@
 % How similar the same person was to himself/herself?
 % Author: Fabio Henrique (oliveirafhm@gmail.com) - 16/09/2018
 
+% Mod: 06/04/2020 - Including statistical test between CV distribution of groups
+
 addpath(genpath('Third party codes'));
 
 %% Load dataset
@@ -70,3 +72,37 @@ ggMeanCVGroup = mean(grandMeanTaskGroup);
 ggStdCVGroup = mean(grandStdTaskGroup);
 openvar('ggMeanCVGroup');
 openvar('ggStdCVGroup');
+
+%% Statistical test
+
+h_dist = grandMeanTaskGroup(:,:,1);
+pd_dist = grandMeanTaskGroup(:,:,2);
+dbs_dist = grandMeanTaskGroup(:,:,3);
+
+% 1 means that sample is non-normal, and 0 otherwise
+fprintf('Normality test\n');
+[h,p] = kstest(h_dist);
+fprintf('H = %d | P = %f\n', h, p);
+[h,p] = kstest(pd_dist);
+fprintf('H = %d | P = %f\n', h, p);
+[h,p] = kstest(dbs_dist);
+fprintf('H = %d | P = %f\n----\n', h, p);
+
+% 0 means same distribution and 1 means different distribution
+fprintf('Mean difference test\n');
+[h, p] = kstest2(h_dist, pd_dist);
+fprintf('H = %d | P = %f\n', h, p);
+
+[h, p] = kstest2(h_dist, dbs_dist);
+fprintf('H = %d | P = %f\n----\n', h, p);
+
+% Test with t test (TODO)
+
+% x = [h_dist; pd_dist; dbs_dist]';
+% p = kruskalwallis(x);
+
+
+
+
+
+
